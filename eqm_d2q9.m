@@ -1,10 +1,6 @@
-function [f_eq] = eqm_d2q9(rho, u, ksi, w, c_s)
+function [f_eq] = eqm_d2q9(rho, u, ksi, w)
 
-    f_eq = zeros(1, 9);
+    f_eq = rho * (1 + (ksi'*u)/(1/3) + ((ksi'*u).^2)/(2/9) - ((u')*u)/(2/3)) .* w';
     
-    guh = sum(1 + (ksi'*u)/(c_s^2) + ((ksi'*u).^2)/(2*c_s^4) - (u'*u)/(2*c_s));
-
-    f_eq = w .* rho .* guh;
-
 end
 

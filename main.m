@@ -16,7 +16,7 @@ w = [4/9 1/9 1/9 1/9 1/9 1/36 1/36 1/36 1/36]; % weights for D2Q9
 
 c_s = 1/sqrt(3); % speed of sound (D2Q9)
 
-Tau = 1.5; % relaxation time
+Tau = 1.2; % relaxation time
 Rho_in = 2;
 
 %% Initialization
@@ -28,14 +28,14 @@ f = zeros(9, N_y, N_x); % PDF for all 9 directions at all locations
 
 for j = 1:N_y
     for i = 1:N_x
-        f(:,j,i) = eqm_d2q9(squeeze(Rho(1,j,i)), squeeze(U(:,j,i)), ksi, w, c_s);
+        f(:,j,i) = eqm_d2q9(squeeze(Rho(1,j,i)), squeeze(U(:,j,i)), ksi, w);
     end
 end
 
 f_new = f; % Update variable
 f_eq = f; % Equilibrium
 
-timer = 2000;
+timer = 500;
 
 %% Solving
 
@@ -63,7 +63,7 @@ for t=1:timer
                     % Abnormal
                     f_new(4,j,i) = f_new(2,j,i);
                     f_new(5,j,i) = f_new(3,j,i);
-                    f_new(7,j,i) = f(7,j,i-1);
+                    f_new(7,j,i) = f_new(7,j,i-1);
                     f_new(8,j,i) = f_new(6,j,i);
                     f_new(9,j,i) = f_new(7,j,i);
                 else %top
@@ -98,7 +98,7 @@ for t=1:timer
                     % Abnormal
                     f_new(3,j,i) = f_new(5,j,i);
                     f_new(4,j,i) = f_new(2,j,i);
-                    f_new(6,j,i) = f(6,j,i-1);
+                    f_new(6,j,i) = f_new(6,j,i-1);
                     f_new(7,j,i) = f_new(9,j,i);
                     f_new(8,j,i) = f_new(6,j,i);
                 else %bot
@@ -149,7 +149,122 @@ for t=1:timer
             end
         end
     end
-
+% for j=1:N_y
+%     for i=1:N_x
+%         if j == 1 % This is the top boundary nodes
+%             if i ==1 % Top-Left corner node
+%                 f_new(1,j,i) = f(1,j,i);
+%                 f_new(3,j,i) = f(3,j+1,i);
+%                 f_new(4,j,i) = f(4,j,i+1);
+%                 f_new(7,j,i) = f(7,j+1,i+1);
+% 
+%                 % Unknown
+%                 f_new(2,j,i) = f_new(4,j,i);
+%                 f_new(5,j,i) = f_new(3,j,i);
+%                 f_new(6,j,i) = Rho_in/2 - f_new(1,j,i)/2 - f_new(3,j,i) - f_new(4,j,i) - f_new(7,j,i);
+%                 f_new(8,j,i) = f_new(6,j,i);
+%                 f_new(9,j,i) = f_new(7,j,i);
+%             elseif i == N_x % Top-right corner node
+%                 f_new(1,j,i) = f(1,j,i);
+%                 f_new(2,j,i) = f(2,j,i-1);
+%                 f_new(3,j,i) = f(3,j+1,i);
+%                 f_new(6,j,i) = f(6,j+1,i-1);
+% 
+%                 % Unknown
+%                 f_new(4,j,i) = f_new(2,j,i);
+%                 f_new(5,j,i) = f_new(3,j,i);
+%                 f_new(7,j,i) = f_new(7,j,i-1);
+%                 f_new(8,j,i) = f_new(6,j,i);
+%                 f_new(9,j,i) = f_new(7,j,i);
+%             else % All other nodes on the top boundary
+%                 f_new(1,j,i) = f(1,j,i);
+%                 f_new(2,j,i) = f(2,j,i-1);
+%                 f_new(3,j,i) = f(3,j+1,i);
+%                 f_new(4,j,i) = f(4,j,i+1);
+%                 f_new(6,j,i) = f(6,j+1,i-1);
+%                 f_new(7,j,i) = f(7,j+1,i+1);
+% 
+%                 % Unknown
+%                 f_new(5,j,i) = f_new(3,j,i);
+%                 f_new(8,j,i) = f_new(6,j,i) + (f_new(2,j,i)-f_new(4,j,i))/2;
+%                 f_new(9,j,i) = f_new(7,j,i) - (f_new(2,j,i)-f_new(4,j,i))/2;
+%             end
+%         elseif j == N_y % This is the bottom boundary nodes
+%             if i ==1 % Bottom-Left corner node
+%                 f_new(1,j,i) = f(1,j,i);
+%                 f_new(4,j,i) = f(4,j,i+1);
+%                 f_new(5,j,i) = f(5,j-1,i);
+%                 f_new(8,j,i) = f(8,j-1,i+1);
+% 
+%                 % Unknown
+%                 f_new(2,j,i) = f_new(4,j,i);
+%                 f_new(3,j,i) = f_new(5,j,i);
+%                 f_new(6,j,i) = f_new(8,j,i);
+%                 f_new(7,j,i) = Rho_in/2 -f_new(1,j,i)/2 -f_new(4,j,i) - f_new(5,j,i) - f_new(8,j,i);
+%                 f_new(9,j,i) = f_new(7,j,i);
+%             elseif i == N_x % Bottom-right corner node
+%                 f_new(1,j,i) = f(1,j,i);
+%                 f_new(2,j,i) = f(2,j,i-1);
+%                 f_new(5,j,i) = f(5,j-1,i);
+%                 f_new(9,j,i) = f(9,j-1,i-1);
+% 
+%                 % Unknown
+%                 f_new(3,j,i) = f_new(5,j,i);
+%                 f_new(4,j,i) = f_new(2,j,i);
+%                 f_new(6,j,i) = f_new(6,j,i-1);
+%                 f_new(7,j,i) = f_new(9,j,i);
+%                 f_new(8,j,i) = f_new(6,j,i);
+%             else % All other nodes on the bottom boundary
+%                 f_new(1,j,i) = f(1,j,i);
+%                 f_new(2,j,i) = f(2,j,i-1);
+%                 f_new(4,j,i) = f(4,j,i+1);
+%                 f_new(5,j,i) = f(5,j-1,i);
+%                 f_new(8,j,i) = f(8,j-1,i+1);
+%                 f_new(9,j,i) = f(9,j-1,i-1);
+% 
+%                 % Unknown
+%                 f_new(3,j,i) = f_new(5,j,i);
+%                 f_new(6,j,i) = f_new(8,j,i) + (f_new(4,j,i)-f_new(2,j,i))/2;
+%                 f_new(7,j,i) = f_new(9,j,i) - (f_new(4,j,i)-f_new(2,j,i))/2;
+%             end
+%         elseif i == 1 % This is the left boundary nodes
+%             f_new(1,j,i) = f(1,j,i);
+%             f_new(3,j,i) = f(3,j+1,i);
+%             f_new(4,j,i) = f(4,j,i+1);
+%             f_new(5,j,i) = f(5,j-1,i);
+%             f_new(7,j,i) = f(7,j+1,i+1);
+%             f_new(8,j,i) = f(8,j-1,i+1);
+% 
+%             % Unknown
+%             U_in = 1-(f_new(1,j,i)+f_new(3,j,i)+f_new(5,j,i)+2*(f_new(4,j,i)+f_new(7,j,i)+f_new(8,j,i)))/Rho_in;
+%             f_new(2,j,i) = f_new(4,j,i)+Rho_in*U_in*2/3;
+%             f_new(6,j,i) = f_new(8,j,i)+(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6; % Double Check
+%             f_new(9,j,i) = f_new(7,j,i)-(f_new(5,j,i)-f_new(3,j,i))/2+Rho_in*U_in/6; % Double Check
+%         elseif i == N_x % This is the right boundary nodes
+%             f_new(1,j,i) = f(1,j,i);
+%             f_new(2,j,i) = f(2,j,i-1);
+%             f_new(3,j,i) = f(3,j+1,i);
+%             f_new(5,j,i) = f(5,j-1,i);
+%             f_new(6,j,i) = f(6,j+1,i-1);
+%             f_new(9,j,i) = f(9,j-1,i-1);
+% 
+%             % Unknown
+%             f_new(4,j,i) = f_new(4,j,i-1);
+%             f_new(7,j,i) = f_new(7,j,i-1);
+%             f_new(8,j,i) = f_new(8,j,i-1);
+%         else  % All interior nodes
+%             f_new(1,j,i) = f(1,j,i);
+%             f_new(2,j,i) = f(2,j,i-1);
+%             f_new(3,j,i) = f(3,j+1,i);
+%             f_new(4,j,i) = f(4,j,i+1);
+%             f_new(5,j,i) = f(5,j-1,i);
+%             f_new(6,j,i) = f(6,j+1,i-1);
+%             f_new(7,j,i) = f(7,j+1,i+1);
+%             f_new(8,j,i) = f(8,j-1,i+1);
+%             f_new(9,j,i) = f(9,j-1,i-1);
+%         end
+%     end
+% end
     % Collision
     % Rho, U calculation
     for j = 1:N_y
@@ -160,7 +275,7 @@ for t=1:timer
     % f_eq calculation
     for j = 1:N_y
         for i = 1:N_x
-            f_eq(:,j,i) = eqm_d2q9(squeeze(Rho(1,j,i)), squeeze(U(:,j,i)), ksi, w, c_s);
+            f_eq(:,j,i) = eqm_d2q9(squeeze(Rho(1,j,i)), squeeze(U(:,j,i)), ksi, w);
         end
     end
     % BGK Collision and Update
