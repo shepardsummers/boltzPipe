@@ -2,7 +2,7 @@
 clear, clc;
 
 % Domain Related
-N_x = 129; % num of x nodes
+N_x = 100; % num of x nodes
 N_y = N_x; % num of y nodes
 d_x = 1; % dist between x nodes
 d_y = 1; % dist between y nodes
@@ -16,7 +16,7 @@ w = [4/9 1/9 1/9 1/9 1/9 1/36 1/36 1/36 1/36]; % weights for D2Q9
 
 c_s = 1/sqrt(3); % speed of sound (D2Q9)
 
-Tau = 0.8; % relaxation time
+Tau = 1; % relaxation time
 Rho_in = 2;
 vis = (Tau-0.5) * c_s^2; % kinematic viscosity
 Re = 100; % Reanolds number
@@ -41,7 +41,7 @@ f_new = f; % Update variable
 f_eq = f; % Equilibrium
 
 timer = 0;
-max_timer = 2000;
+max_timer = 200;
 cont = true;
 r = animatedline;
 
@@ -164,7 +164,6 @@ for t = 1:max_timer
         end
     end
     % Collision
-    Rho_old = Rho;
     % Rho, U calculation
     for j = 1:N_y
         for i = 1:N_x
@@ -178,10 +177,11 @@ for t = 1:max_timer
         end
     end
 
+    f_old = f;
     % BGK Collision and Update
     f = f_new - (f_new-f_eq)/Tau;
 
-    [guh, max_error] = res(Rho_old, Rho, min_error);
+    [guh, max_error] = res(f_old, f, min_error);
     
     addpoints(r, t, max_error)
     drawnow
@@ -191,7 +191,6 @@ end
 
 %% Post-Processing / Visualization
 clc;
-load Ghia_Re100.mat
 figure
 quiver(flipud(squeeze(U(1,:,:))),flipud(squeeze(U(2,:,:))),10)
 axis equal tight
@@ -200,21 +199,19 @@ figure
 contourf(flipud(squeeze(Rho)),30)
 axis equal tight
 
-Vertical_Sample = U(1, :, 65)/U_top;
-Horizontal_Sample = U(2, 65, :)/U_top;
+Vertical_Sample = U(1, :, 50)/U_top;
+Horizontal_Sample = U(2, 50, :)/U_top;
 
-figure
-plot(flip(Vertical_Sample), (1:L)/L, flip(u_Ghia), flip(y_Ghia))
 %figure
-%plot(flip(Vertical_Sample), (1:L)/L)
-figure
-plot((1:L)/L, squeeze(Horizontal_Sample), flip(x_Ghia), flip(v_Ghia))
+%plot(flip(Vertical_Sample), (1:L)/L, flip(u_Ghia), flip(y_Ghia))
+
 %figure
-%plot((1:L)/L, squeeze(Horizontal_Sample))
-figure
-u = flip(squeeze(U(1, :, :)));
+%plot((1:L)/L, squeeze(Horizontal_Sample), flip(x_Ghia), flip(v_Ghia))
+
+
+u = squeeze(U(1, :, :));
 v = squeeze(U(2, :, :));
-[startX, startY] = meshgrid(1:5:N_x, 1:5:N_y);
-verts = stream2(1:N_x,1:N_y,u,v,startX,startY);
-streamline(verts)
+[startX, startY] = meshgrid(1:N)
+
+streamline(u, v)
 

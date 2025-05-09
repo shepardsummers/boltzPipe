@@ -183,3 +183,18 @@ for j = 1:N_y
 end
 hold on
 plot((0:1:N_y-1)/(N_y-1), u_sim/max(u_sim), "blue");
+
+% Sampling u_x velocity from the outlet
+for j=1:N_y
+    u_sim(j) = U(1,j,N_x);
+end
+hold on
+plot((0:1:N_y-1)/(N_y-1),u_sim/max(u_sim),"blue")
+
+figure
+quiver(flipud(squeeze(U(1,:,:))),flipud(squeeze(U(2,:,:))),10)
+axis equal tight
+
+figure
+contourf(flipud(squeeze(Rho)),30)
+axis equal tight
